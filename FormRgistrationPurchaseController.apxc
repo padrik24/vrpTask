@@ -1,0 +1,145 @@
+public with sharing class FormRgistrationPurchaseController {
+    public Decimal totalAmount = 0;
+    
+    Product_Table__c product = new Product_Table__c();
+    Product_Table__c productForInputField = new Product_Table__c();
+    Contact contactForInputField = new Contact();
+    String modalviewHeader = '';
+    String modalviewContent = '';
+    public boolean displayPopup {get; set;}
+    
+    public FormRgistrationPurchaseController(){
+        String Id = System.currentPagereference().getParameters().get('Id');
+        product = [SELECT Id, Name, Product_Description__c, Unit_Price__c, Units_Available__c, LastModifiedById, Image__c, Image_URL__c, Title__c FROM Product_Table__c WHERE Id =: Id];
+    }
+    
+    public Product_Table__c getProduct() {
+        return product;
+    }
+    
+    public void setProduct(Product_Table__c product) {
+        this.product = product;
+    }
+        
+    public Product_Table__c getProductForInputField() {
+        return productForInputField;
+    }
+    
+    public void setProductForInputField(Product_Table__c productForInputField) {
+        this.productForInputField = productForInputField;
+    }
+    
+    public Contact getContactForInputField() {
+        return this.contactForInputField;
+    }
+    
+    public void getContactForInputField(Contact contactForInputField) {
+        this.contactForInputField = contactForInputField;
+    }
+    
+    public Decimal getTotalAmount(){
+        if(productForInputField.Units_Available__c == null) {productForInputField.Units_Available__c = 0;}
+        return productForInputField.Units_Available__c * product.Unit_Price__c;
+    }
+    
+    public void setTotalAmount(Decimal totalAmount){
+        this.totalAmount = totalAmount;
+    }
+    
+    public String getModalviewHeader() {
+        return modalviewHeader;
+    }
+    
+    public void setModalviewHeader(String modalviewHeader) {
+        this.modalviewHeader = modalviewHeader;
+    }
+    
+    public String getModalviewContent() {
+        return modalviewContent;
+    }
+    
+    public void setModalviewContent(String modalviewContent) {
+        this.modalviewContent = modalviewContent;
+    }
+    
+    public void closePopup() {        
+        displayPopup = false;    
+    }     
+    public void showPopup() {        
+        displayPopup = true;    
+    }
+    
+    public void buyProduct() {
+        String email = contactForInputField.Email;
+        String firstName = contactForInputField.FirstName;
+        String lastName = contactForInputField.LastName;
+        Decimal unitCount = productForInputField.Units_Available__c;
+        String contactId = '';
+        
+        System.debug('email - ' + email);
+        System.debug('firstName - ' + firstName);
+        System.debug('lastName - ' + lastName);
+        System.debug('unitCount - ' + unitCount);
+        
+        Savepoint sp = Database.setSavepoint();
+        try {
+            if(email != null || email != '') {
+                List<Contact> contacts = [SELECT Id FROM Contact WHERE Email = :email];
+                if(contacts != null && contacts.size() > 0) {
+                    contactId = updateContact(contacts.get(0), firstName, lastName).Id;
+                } else {
+                    contactId = createNewContact(email, firstName, lastName).Id;
+                }
+            } else {
+                contactId = createNewContact(null, firstName, lastName).Id;
+            }
+        
+        
+            Order_Table__c newOrder = new Order_Table__c();
+            newOrder.Product__c = product.Id;
+            newOrder.Units__c = unitCount;
+            newOrder.Order_Amount__c = unitCount * product.Unit_Price__c;
+            newOrder.Contact__c = contactId;
+            
+            insert newOrder;
+            
+            if(product.Units_Available__c - unitCount < 0) {
+                Database.rollback(sp);
+                modalviewContent = 'При оформлении заказа произошла ошибка.\n Количество указанное в поле Unit Count не может быть больше ' + product.Units_Available__c;
+            } else {
+                if(unitCount == 0){
+                    Database.rollback(sp);
+                    modalviewContent = 'При оформлении заказа произошла ошибка.\n Введите количество товара.';
+                } else {
+                    product.Units_Available__c -= unitCount;
+                    update product;
+                    modalviewContent = 'Поздравляем Ваш заказ оформлен';
+                }
+            }
+        } catch(Exception e) {
+            Database.rollback(sp);
+            modalviewContent = 'При оформлении заказа произошла ошибка. Приносим свои извинения!';
+        }
+        showPopup();
+    }
+    
+    public void reRenderFields() {
+    }
+    
+    private Contact createNewContact(String email, String firstName, String lastName) {
+        Contact newContact = new Contact();
+        newContact.Email = email;
+        newContact.FirstName = firstName;
+        newContact.LastName = lastName == null ? '' : lastName;
+        insert newContact;
+        return newContact;
+    }
+    
+    private Contact updateContact(Contact contact, String firstName, String lastName) {
+        contact.FirstName = firstName;
+        contact.LastName = lastName == null ? '' : lastName;
+        update contact;
+        return contact;
+    }
+
+}

@@ -1,0 +1,12 @@
+public with sharing class ProductTableController {
+    
+    List<Product_Table__c> productList = new List<Product_Table__c>();
+    
+    public ProductTableController() {
+        productList = [SELECT Id, Name, Product_Description__c, Unit_Price__c, Units_Available__c, LastModifiedById, Image__c, Image_URL__c, Title__c FROM Product_Table__c];
+    }
+
+    public List<Product_Table__c> getProducts() {
+        return productList;
+    }
+}

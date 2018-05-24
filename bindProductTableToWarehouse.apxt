@@ -1,0 +1,3 @@
+trigger bindProductTableToWarehouse on Product_Table__c (before insert) {
+	new TriggerHandlerBeforeInsert().bindProductTableToWarehouse(Trigger.New);
+}

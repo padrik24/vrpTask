@@ -1,0 +1,76 @@
+<apex:page controller="ProductDetailsController">
+<style>
+img{
+    border: 0;
+    height: auto;
+	width: 18em;
+}
+</style>
+    <apex:slds />
+    <div class="slds-grid slds-grid_align-center">
+	  <div class="slds-box slds-col slds-size_12-of-12 slds-grid_align-center">
+        <div class="slds-text-heading_large slds-align_absolute-center">{!product.Name}</div>
+      </div>
+    </div>
+    
+    <div class="slds-grid slds-grid_align-center">
+        
+        <div class="slds-panel slds-size_medium slds-panel_docked slds-panel_docked-left slds-is-open slds-m-right_x-large" aria-hidden="false"> 
+          <div class="slds-panel__body">
+              <apex:outputField value="{! product.Image__c}"/>
+          </div>
+        </div>
+        
+        <div class="slds-panel slds-size_large slds-panel_docked slds-panel_docked-left slds-is-open" aria-hidden="false"> 
+          <div class="slds-panel__body">
+              
+              <fieldset class="slds-form-element slds-m-bottom_small">
+                  <legend class="slds-form-element__label slds-form-element__legend slds-text-title_caps">cost:</legend>
+                  <div class="slds-align_absolute-right slds-align_absolute-left slds-text-heading_small"> 
+                      <apex:outputText value="{0, number, Currency}">
+                          <apex:param value="{! product.Unit_Price__c}"/>
+                      </apex:outputText>
+                  </div>
+              </fieldset>
+              
+              <fieldset class="slds-form-element slds-m-bottom_small">
+                  <legend class="slds-form-element__label slds-form-element__legend slds-text-title_caps">amount:</legend>
+                  <div class="slds-text-heading_small">
+                      <p>{! IF(product.Units_Available__c == null, 0, product.Units_Available__c)}</p>
+                  </div>
+              </fieldset>
+              
+              <fieldset class="slds-form-element slds-m-bottom_small">
+                  <legend class="slds-form-element__label slds-form-element__legend slds-text-title_caps">title:</legend>
+                  <div class="slds-text-heading_small">
+                      <p>{! product.Title__c}</p>
+                  </div>
+              </fieldset>
+              
+              <fieldset class="slds-form-element">
+                  <legend class="slds-form-element__label slds-form-element__legend slds-text-title_caps">Description:</legend>    
+                  <div class="slds-text-heading_small">
+                  <p>{!product.Product_Description__c}</p>
+                  </div>
+              </fieldset>
+              
+          </div>
+        </div>
+        
+    </div>
+    
+    
+    <div style="height: 180px;">
+      <div class="slds-docked-form-footer">
+            <apex:outputLink styleClass="slds-button slds-button_neutral" value="{!URLFOR($Page.ProductTable)}" id="ToShoppingLink">
+            	To Shopping
+        	</apex:outputLink>
+			<apex:outputLink styleClass="slds-button slds-button_brand" value="{!URLFOR($Page.FormRegistrationPurchase)}" id="BuyLink">
+            	Buy
+                <apex:param name="Id" value="{! product.Id}"/>
+        	</apex:outputLink>
+      </div>
+    </div>
+    
+    
+</apex:page>

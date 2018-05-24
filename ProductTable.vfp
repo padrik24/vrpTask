@@ -1,0 +1,93 @@
+<apex:page controller="ProductTableController">
+<apex:form id="RID">
+<style> 
+.wrapping
+{
+  white-space: pre-wrap; /* css-3 */
+  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+  white-space: -pre-wrap; /* Opera 4-6 */
+  white-space: -o-pre-wrap; /* Opera 7 */
+  word-wrap: break-word; /* Internet Explorer 5.5+ */
+} 
+</style>  
+	<apex:slds />
+    <div class="slds-grid slds-grid_align-center">
+	  <div class="slds-box slds-col slds-size_12-of-12 slds-grid_align-center">
+        <div class="slds-text-heading_large slds-align_absolute-left">Products Table</div>
+      </div>
+    </div>
+    <div class="slds-grid slds-grid_align-center">     
+        <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-size_12-of-12">
+          <thead>
+            <tr class="slds-text-title_caps">
+              <th scope="col" style="width:20%">
+                <div class="slds-truncate" title="IMAGE">IMAGE</div>
+              </th>
+              <th scope="col" style="width:20%">
+                <div class="slds-truncate"></div>
+              </th>
+              <th scope="col" style="width:30%">
+                <div class="slds-truncate" title="TITLE">TITLE</div>
+              </th>
+              <th scope="col" style="width:30%">
+                <div class="slds-truncate" title="DESCRIPTION">DESCRIPTION</div>
+              </th>
+              <th scope="col">
+                <div class="slds-truncate" title="COST">COST</div>
+              </th>
+              <th scope="col">
+                <div class="slds-truncate"></div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <apex:repeat value="{!products}" var="product" id="repeatProduct">
+            <tr>
+              <td data-label="IMAGE">
+                <apex:outputLink value="{!URLFOR($Page.ProductDetails)}" id="ImageLink" target="_blank">
+                  <apex:outputField value="{! product.Image__c}"/>
+                  <apex:param name="Id" value="{! product.Id}"/>
+                </apex:outputLink>
+              </td>
+              <td data-label="">
+                <apex:outputLink value="{!URLFOR($Page.ProductDetails)}" id="NameLink" target="_blank">
+                  <p class="slds-text-heading_small slds-hyphenate">{! product.Name}</p>
+                  <apex:param name="Id" value="{! product.Id}"/>
+                </apex:outputLink>
+              </td>
+              <td data-label="TITLE">
+                <div class="wrapping">
+                  <p>{! product.Title__c}</p>
+                </div>
+              </td>
+              <td data-label="DESCRIPTION">
+                <div class="wrapping">
+                <p>{! IF(LEN(product.Product_Description__c) > 100, LEFT(product.Product_Description__c, 100), product.Product_Description__c)}<apex:outputLink value="{!URLFOR($Page.ProductDetails)}" id="DescriptionLink" target="_blank">{! IF(LEN(product.Product_Description__c) > 100, '...More.', '')}
+                        <apex:param name="Id" value="{! product.Id}"/>
+                   	</apex:outputLink>
+                </p>
+                </div>
+              </td>
+              <td data-label="COST">
+                <div class="slds-align_absolute-right slds-align_absolute-center"> 
+                  <apex:outputText value="{0, number, Currency}">
+                    <apex:param value="{! product.Unit_Price__c}"/>
+                  </apex:outputText>
+                </div>
+              </td>
+              <td data-label="">
+                <div class="slds-align_absolute-right slds-align_absolute-center">
+                  <apex:outputLink styleClass="slds-button slds-button_brand" value="{!URLFOR($Page.FormRegistrationPurchase)}" id="BuyLink">
+            		Buy
+                    <apex:param name="Id" value="{! product.Id}"/>
+        		  </apex:outputLink>
+                </div>
+              </td>
+            </tr>
+            </apex:repeat>
+          </tbody>
+        </table>
+        <apex:outputPanel id="dummy"/>
+	</div>
+    </apex:form>
+</apex:page>

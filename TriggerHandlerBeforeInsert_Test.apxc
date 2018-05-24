@@ -1,0 +1,48 @@
+@isTest
+public class TriggerHandlerBeforeInsert_Test {
+    // Для успешного прохождения теста необходимо что-бы:
+    // 1.productTable_1 и productTable_2 связались с warehouse_1
+    // 2.productTable_3 связался с warehouse_3
+    // 3.общее кол-во созданных записей Warehouse__c должно равняться 5
+    // 4.присутствовала запись Warehouse__c с Period_Start__c = addedDateProductTable4 и Period_End__c = addedDateProductTable4 + DEFAULT_PERIOD_TERM
+    // 5.присутствовала запись Warehouse__c с Period_Start__c = addedDateProductTable5 и Period_End__c = addedDateProductTable5 + DEFAULT_PERIOD_TERM
+    @isTest
+    static void testBindProductTableToWarehouse() {
+        final Integer DEFAULT_PERIOD_TERM = 10; // From class TriggerHandlerBeforeInsert
+        Date addedDateProductTable2 = Date.newInstance(2018, 5, 6);
+        Date addedDateProductTable3 = Date.newInstance(2018, 5, 10);
+        Date addedDateProductTable4 = Date.newInstance(2018, 5, 2);
+        Date addedDateProductTable5 = Date.newInstance(2018, 5, 21);
+        
+        List<Warehouse__c> warehouseList = new List<Warehouse__c>();
+        warehouseList.add(new Warehouse__c(Name = 'warehouse_1', Period_Start__c = Date.today() - 1, Period_End__c = Date.today() + 2));
+        warehouseList.add(new Warehouse__c(Name = 'warehouse_2', Period_Start__c = Date.today() - 2, Period_End__c = Date.today() + 2));
+        warehouseList.add(new Warehouse__c(Name = 'warehouse_3', Period_Start__c = Date.today() - 3, Period_End__c = Date.today() + 10));
+        
+        
+        List<Product_Table__c> productTableList = new List<Product_Table__c>();
+        productTableList.add(new Product_Table__c(Name = 'productTable_1'));
+        productTableList.add(new Product_Table__c(Name = 'productTable_2', Added_Date__c = addedDateProductTable2));
+        productTableList.add(new Product_Table__c(Name = 'productTable_3', Added_Date__c = addedDateProductTable3));
+        productTableList.add(new Product_Table__c(Name = 'productTable_4', Added_Date__c = addedDateProductTable4));
+        productTableList.add(new Product_Table__c(Name = 'productTable_5', Added_Date__c = addedDateProductTable5));
+  
+        Test.startTest();
+        insert warehouseList;
+        insert productTableList;
+        Test.stopTest();
+
+        warehouseList = [SELECT Id, Name, Period_Start__c, Period_End__c FROM Warehouse__c];
+        productTableList = [SELECT Warehouse__c, Added_Date__c FROM Product_Table__c];
+     	
+
+        System.assertEquals(5, warehouseList.size());
+        System.assertEquals(productTableList.get(0).Warehouse__c, warehouseList.get(0).Id);
+        System.assertEquals(productTableList.get(1).Warehouse__c, warehouseList.get(0).Id);
+        System.assertEquals(productTableList.get(2).Warehouse__c, warehouseList.get(2).Id);
+        System.assertEquals(addedDateProductTable4, warehouseList.get(3).Period_Start__c);
+        System.assertEquals(addedDateProductTable4 + DEFAULT_PERIOD_TERM, warehouseList.get(3).Period_End__c);
+        System.assertEquals(addedDateProductTable5, warehouseList.get(4).Period_Start__c);
+        System.assertEquals(addedDateProductTable5 + DEFAULT_PERIOD_TERM, warehouseList.get(4).Period_End__c);
+    }
+}

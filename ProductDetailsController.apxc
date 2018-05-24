@@ -1,0 +1,16 @@
+public with sharing class ProductDetailsController {
+    Product_Table__c product = new Product_Table__c();
+    public ProductDetailsController() {
+        String Id = System.currentPagereference().getParameters().get('Id');
+        product = [SELECT Id, Name, Product_Description__c, Unit_Price__c, Units_Available__c, LastModifiedById, Image__c, Image_URL__c, Title__c FROM Product_Table__c WHERE Id =: Id];
+    }
+    
+    public Product_Table__c getProduct() {
+        return product;
+    }
+    
+    public void setProduct(Product_Table__c product) {
+        this.product = product;
+    }
+
+}
